@@ -1,0 +1,91 @@
+{% load django_bootstrap5 %}
+{% load bootstrap_icons %}
+<div class="modal fade" id="new-instruction-modal" tabindex="-1" aria-labelledby="new-instruction-modal-label" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="new-instruction-modal-label">New Instruction</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form action="/presto/" method="post" class="form" enctype="multipart/form-data">
+
+        <div class="modal-body">
+        <div class="card">
+  <div class="card-header">
+    File Instructions
+  </div>
+  <div class="card-body">
+    <div class="card">
+  <div class="card-header">
+    <div class="d-flex justify-content-end">
+      
+      <div class="btn-group btn-group-sm" role="group" aria-label="Basic example">
+  <button type="button" class="btn">{% bs_icon 'arrow-up' size='1.25em' %}</button>
+  <button type="button" class="btn">{% bs_icon 'arrow-down' size='1.25em' %}</button>
+  <button type="button" class="btn">{% bs_icon 'trash' size='1.25em' %}</button>
+</div>
+      
+    </div>
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">Special title treatment</h5>
+    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+    <a href="#" class="btn btn-primary">Go somewhere</a>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header">
+    File Instructions
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">Special title treatment</h5>
+    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+    <a href="#" class="btn btn-primary">Go somewhere</a>
+  </div>
+</div>
+  </div>
+</div>
+<div class="card">
+  <div class="card-header">
+    Boxscore Instructions
+  </div>
+  <div class="card-body">
+    <h5 class="card-title">Special title treatment</h5>
+    <p class="card-text">With supporting text below as a natural lead-in to additional content.</p>
+    <a href="#" class="btn btn-primary">Go somewhere</a>
+  </div>
+</div>
+
+            {% comment %} {% csrf_token %}
+            {% for field in form %}
+              <div class="form-check">
+                {% if field.name == 'instruction' %}
+                {{ form.instruction.label }}
+                {{ form.instruction | safe }}
+                <div class='text-danger'>
+                {{ form.instruction.errors }}
+                </div>
+                {% else %}
+                {% bootstrap_field field %}
+                {% endif %}
+                </div>
+            {% endfor %} {% endcomment %}
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#test-modal" title="Add Instruction">
+        Test
+      </button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            {% bootstrap_button button_type="submit" content="Submit" class="success" %}
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
+
+{% include 'presto/partials/test_modal.html' with instruction=instruction %}

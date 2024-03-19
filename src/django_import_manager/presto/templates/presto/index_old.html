@@ -1,0 +1,121 @@
+
+
+{% extends "core/shared/base.html" %}
+
+{% load prettyjson %}
+{% load bootstrap_icons %}
+
+{% block head %}
+
+{% prettyjson_setup %}
+
+{% comment %} <style>
+  .readonly-modal .parseraw {
+    display: none;
+  }
+</style> {% endcomment %}
+<style>
+  .parsed {
+    resize: unset !important;
+  }
+</style>
+
+{% endblock %}
+
+{% block body %}
+<div class="card text-center">
+  <div class="card-header">
+    <div class="d-flex justify-content-between">
+      <h4>Downloads</h4>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#new-instruction-modal" title="Add Instruction">
+        {% bs_icon 'plus' size='1.5em' %}
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Index</th>
+          <th scope="col">Client</th>
+          <th scope="col">FTP Server Number</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for instruction in instructions %}
+        <tr>
+          <td>{{ forloop.counter }}
+          <td>{{ instruction.client }}</td>
+          <td>{{ instruction.ftp_server_number }}</td>
+          <td>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#view-instructions-modal-{{instruction.id}}" title="View Instructions">
+              {% bs_icon 'list-task' size='1.5em' %}
+            </button>
+            {% if instruction.is_started %}
+            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#view-logs-modal-{{instruction.id}}" title="View Logs">
+              {% bs_icon 'clock-history' size='1.5em' %}
+            </button>
+            {% endif %}
+            {% if not instruction.is_started %}
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#start-download-modal-{{instruction.id}}" title="Start Download {{forloop.counter}}">
+              {% bs_icon 'arrow-right' size='1.5em' %}
+            </button>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Button trigger modal -->
+{% load django_bootstrap5 %}
+
+<!-- Modal -->
+{% include 'presto/partials/new_instruction_modal_original.html' with instruction=instruction %}
+
+{% for instruction in instructions %}
+  {% include 'presto/partials/view_instructions_modal.html' with instruction=instruction %}
+
+  {% if instruction.is_started %}
+    {% include 'presto/partials/view_logs_modal.html' with instruction_id=instruction.id %}
+  {% endif %}
+
+  {% if not instruction.is_started %}
+    {% include 'presto/partials/start_download_modal.html' with index=forloop.counter instruction_id=instruction.id %}
+  {% endif %}
+{% endfor %}
+
+{% for instruction in instructions %}
+<div class="modal fade readonly-modal" id="exampleModal{{forloop.counter}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        {% prettyjson instruction.instruction initial='parsed' %}
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+  {% endfor %}
+
+{% if form.errors %}
+<script type="text/javascript">
+    window.onload = () => {
+        const myModal = new bootstrap.Modal('#new-instruction-modal');
+      myModal.show();
+    }
+</script>
+{% endif %}
+
+{% endblock %}

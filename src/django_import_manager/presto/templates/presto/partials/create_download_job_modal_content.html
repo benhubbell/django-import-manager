@@ -1,0 +1,60 @@
+{% load bootstrap_icons %}
+
+<div id="create-download-job-modal-content" class="modal-content d-none">
+  <div class="modal-header">
+    <h5 class="modal-title" id="exampleModalLabel">Create Download Job</h5>
+    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+  </div>
+  <form>
+    <div class="modal-body">
+      <div class="container">
+        <div class="row">
+          <div class="col-12 ">
+            <div class="input-group mb-3">
+              <input type="text" class="form-control" placeholder="Client ID" aria-label="client ID input">
+            </div>
+            <div class="input-group mb-3">
+              <select class="form-select" aria-label="FTP server select">
+                <option value="" selected disabled>Select FTP Server Number...</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3</option>
+                <option value="4">4</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="col-12">
+        <div class="card">
+          <div class="card-header d-flex justify-content-between">
+            <div>
+              File Instructions
+            </div>
+            <div>
+              <button id="add-instruction-button" type="button" class="btn btn-sm btn-primary">
+                {% bs_icon 'plus' size='1.5em' %}
+              </button>
+            </div>
+          </div>
+          
+              <div class="card-body">
+                <div id="add-instruction-info" class="alert alert-info" role="alert">
+                  Add an instruction...
+                </div>
+                <div id="file-instructions-list">
+
+                </div>
+              </div>
+              
+      </div>
+      <div class="col-6">
+        One of three columns
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      <button type="button" class="btn btn-primary">Submit</button>
+    </div>
+  </form>
+</div>

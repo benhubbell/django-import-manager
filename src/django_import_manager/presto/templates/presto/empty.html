@@ -1,0 +1,428 @@
+
+
+{% extends "core/shared/base.html" %}
+
+{% load prettyjson %}
+{% load bootstrap_icons %}
+
+{% block head %}
+
+{% prettyjson_setup %}
+
+{% comment %} <style>
+  .readonly-modal .parseraw {
+    display: none;
+  }
+</style> {% endcomment %}
+<style>
+  .parsed {
+    resize: unset !important;
+  }
+
+  .btn:onc {
+    outline: none;
+  }
+</style>
+
+{% endblock %}
+
+{% block body %}
+<div class="overlay">
+<div class="card text-center">
+  <div class="card-header">
+    <div class="d-flex justify-content-between">
+      <h4>Downloads</h4>
+      <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-button-tag="create-download-job" title="Create Download Job">
+        {% bs_icon 'plus' size='1.5em' %}
+      </button>
+    </div>
+  </div>
+  <div class="card-body">
+    <table class="table table-bordered table-striped">
+      <thead>
+        <tr>
+          <th scope="col">Index</th>
+          <th scope="col">Client</th>
+          <th scope="col">FTP Server Number</th>
+          <th scope="col">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+      {% for instruction in instructions %}
+        <tr data-dim-download-job-id="{{instruction.id}}" data-dim-download-job-instructions="{{instruction.instruction}}">
+          <td>{{ forloop.counter }}
+          <td>{{ instruction.client }}</td>
+          <td>{{ instruction.ftp_server_number }}</td>
+          <td>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-button-tag="edit-download-job" title="Edit Download Job">
+              {% bs_icon 'pencil' size='1.5em' %}
+            </button>
+            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal" data-bs-button-tag="@edit-download-job" title="Edit Download Job">
+              {% bs_icon 'list-task' size='1.5em' %}
+            </button>
+            {% if instruction.is_started %}
+            <button type="button" class="btn btn-info" data-bs-toggle="modal" data-bs-target="#view-logs-modal-{{instruction.id}}" title="View Logs">
+              {% bs_icon 'clock-history' size='1.5em' %}
+            </button>
+            {% endif %}
+            {% if not instruction.is_started %}
+            <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#start-download-modal-{{instruction.id}}" title="Start Download {{forloop.counter}}">
+              {% bs_icon 'arrow-right' size='1.5em' %}
+            </button>
+            {% endif %}
+          </td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+</div>
+<p>
+    <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseExample" >
+      Button with data-bs-target
+    </button>
+  </p>
+  <div class="collapse" id="collapseExample">
+    <div class="card card-body">
+      Some placeholder content for the collapse component. This panel is hidden by default but revealed when the user activates the relevant trigger.
+    </div>
+  </div>
+<!-- Button trigger modal -->
+{% comment %} {% load django_bootstrap5 %} {% endcomment %}
+
+<!-- Modal -->
+{% comment %} {% include 'presto/partials/new_instruction_modal.html' with instruction=instruction %}
+
+{% for instruction in instructions %}
+  {% include 'presto/partials/view_instructions_modal.html' with instruction=instruction %}
+
+  {% if instruction.is_started %}
+    {% include 'presto/partials/view_logs_modal.html' with instruction_id=instruction.id %}
+  {% endif %}
+
+  {% if not instruction.is_started %}
+    {% include 'presto/partials/start_download_modal.html' with index=forloop.counter instruction_id=instruction.id %}
+  {% endif %}
+{% endfor %} {% endcomment %}
+
+{% for instruction in instructions %}
+<div class="modal fade readonly-modal" id="exampleModal{{forloop.counter}}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="exampleModalLabel">Modal title</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <div class="modal-body">
+        {% prettyjson instruction.instruction initial='parsed' %}
+      </div>
+
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+  {% endfor %}
+
+{% if form.errors %}
+<script type="text/javascript">
+    window.onload = () => {
+        const myModal = new bootstrap.Modal('#new-instruction-modal');
+      myModal.show();
+    }
+</script>
+{% endif %}
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-xl">
+    {% include 'presto/partials/create_download_job_modal_content.html' %}
+    {% include 'presto/partials/edit_download_job_modal_content.html' %}
+  </div>
+</div>
+<script>
+(function () {
+    var elements = {
+        exampleModal: document.getElementById('exampleModal'),
+        addInstructionButton: document.getElementById('add-instruction-button'),
+        addInstructionInfo: document.getElementById('add-instruction-info'),
+        fileInstructionsList: document.getElementById('file-instructions-list')
+    }
+
+    var state = {
+        activeModalContent: null,
+        instructions: [],
+        instructionCount: 0,
+    }
+
+    var methods = {
+        'init': () => {
+            elements.exampleModal.addEventListener('show.bs.modal', (event) => {
+                var clickedButton = event.relatedTarget;
+                var row = clickedButton.parentElement.parentElement;
+                var id = row.getAttribute('data-dim-download-job-id');
+                /**/
+                var tag = clickedButton.getAttribute('data-bs-button-tag');
+                if (tag == 'create-download-job') {
+                    state.activeModalContent = document.getElementById('create-download-job-modal-content');
+                    state.activeModalContent.classList.remove('d-none');
+
+                }
+                else if (tag == "edit-download-job") {
+                    state.activeModalContent = document.getElementById('edit-download-job-modal-content');
+                    state.activeModalContent.classList.remove('d-none');
+                    var form = document.getElementById('edit-download-job-form');
+                    var idField = form.elements['id'];
+                    idField.value = id
+                }
+                /*
+                var modalTitle = exampleModal.querySelector('.modal-title')
+                var modalBodyInput = exampleModal.querySelector('.modal-body')
+                var a = document.getElementById("create-download-job-modal-content");
+                a.classList.remove('d-none');
+                /**/
+            });
+        
+            elements.exampleModal.addEventListener('hidden.bs.modal', (event) => {
+                state.activeModalContent.classList.add('d-none');
+                state.activeModalContent = null;
+
+                elements.fileInstructionsList.innerHTML = "";
+                state.instructions = []
+            });
+            
+
+            elements.addInstructionButton.addEventListener('click', (event) => {
+                var collapseId = crypto.randomUUID()
+                var newInstructionCard = document.createElement('div');
+            
+                newInstructionCard.innerHTML = `{{ instruction_form_content }}`;
+                newInstructionCard.querySelectorAll('.card > .card-header > div > .bs-collapse').forEach((item) => item.setAttribute('data-bs-target', `#collapsable-${collapseId}`));
+                newInstructionCard.querySelector('.card > .card-body').id = `collapsable-${collapseId}`;
+
+                if (state.instructionCount == 0) {
+                    newInstructionCard.querySelector('.move-instruction-up-button').classList.add('d-none');
+                    newInstructionCard.querySelector('.move-instruction-down-button').classList.add('d-none');
+                    elements.addInstructionInfo.classList.add('d-none');
+                }
+                else {
+                    var instructionCards = elements.fileInstructionsList.children;
+                    var lastInstructionCard = instructionCards[instructionCards.length - 1];
+                    lastInstructionCard.querySelector('.move-instruction-down-button').classList.remove('d-none');
+                    newInstructionCard.querySelector('.move-instruction-down-button').classList.add('d-none');
+                }
+                
+                // var lastCard = document.getElementById(state.instructions[state.instructions.length-1]);
+                // lastCard.querySelector('.move-down').classList.add('d-none');
+                
+                // state.instructions.push(instructionId);
+                newInstructionCard = newInstructionCard.firstElementChild;
+                elements.fileInstructionsList.appendChild(newInstructionCard);
+                /**/
+
+
+
+                newInstructionCard.scrollIntoView()
+                state.instructionCount++;
+            })
+
+            // document.addEventListener("click", function(e){
+            //     const target = e.target.closest(".add-directory-button"); // Or any other selector.
+
+            //     if(target){
+            //         var instructionCard = target.closest('.instruction-card');
+            //         var directoryList = instructionCard.querySelector('.directory-list');
+
+                    
+            //     }
+            // });
+
+            // document.addEventListener("click", function(e){
+            //     const target = e.target.closest(".move-instruction-down-button");
+
+            //     if (target){
+            //         // Find associated instruction card
+            //         var instructionCard = target.closest('.instruction-card');
+
+            //         // Remove instruction card from state
+            //         state.instructions.splice(state.instructions.indexOf(instructionCard.id), 1);
+
+            //         // Remove instruction card
+            //         instructionCard.remove()
+
+            //         if (state.instructions.length == 0) {
+            //             elements.addInstructionInfo.classList.remove('d-none');
+            //         }
+            //     }
+    
+            // });
+
+            // Event listener for removing instructions
+            document.addEventListener("click", function(e){
+                const target = e.target.closest(".remove-instruction-button");
+
+                if (target){
+                    // Find associated instruction card
+                    var instructionCard = target.closest('.instruction-card');
+
+                    // Decrement instruction count
+                    state.instructionCount--;
+
+                    // Remove instruction card
+                    instructionCard.remove()
+
+                    if (state.instructionCount == 0) {
+                        elements.addInstructionInfo.classList.remove('d-none');
+                    }
+                }
+                
+            });
+
+            // Event listener for adding a directory item to an instruction
+            document.addEventListener("click", function(e){
+                const target = e.target.closest(".add-directory-button");
+
+                if (target){
+                    var card = target.closest('.card');
+                    var directoryList = card.querySelector('.directory-list');
+                    var directoryFormInputGroup = document.createElement('div');
+
+                    directoryFormInputGroup.innerHTML = `{{ directory_form_input_group }}`;
+                    directoryFormInputGroup = directoryFormInputGroup.firstElementChild;
+                    directoryList.appendChild(directoryFormInputGroup);
+
+                    if (directoryList.children.length == 1) {
+                        card.querySelector('.add-directory-info').classList.add('d-none');
+                    }
+                }
+                
+            });
+
+            // Event listener for adding a file item to an instruction
+            document.addEventListener("click", function(e){
+                const target = e.target.closest(".add-file-button");
+
+                if (target){
+                    var card = target.closest('.card');
+                    var fileList = card.querySelector('.file-list');
+                    var fileFormInputGroup = document.createElement('div');
+                    console.log('hello')
+                    fileFormInputGroup.innerHTML = `{{ file_form_input_group }}`;
+                    fileFormInputGroup = fileFormInputGroup.firstElementChild;
+                    fileList.appendChild(fileFormInputGroup);
+
+                    if (fileList.children.length == 1) {
+                        card.querySelector('.add-file-info').classList.add('d-none');
+                    }
+                }
+
+            });
+
+            // Event listener for removing a directory item from an instruction
+            document.addEventListener('click', (e) => {
+                const target = e.target.closest('.remove-directory-button')
+
+                if (target) {                    
+                    var card = target.closest('.card');
+                    var directoryList = card.querySelector('.directory-list');
+
+                    target.parentElement.remove();
+
+                    if (directoryList.children.length == 0) {
+                        card.querySelector('.add-directory-info').classList.remove('d-none');
+                    }
+                }
+            })
+
+            // Event listener for removing a file item from an instruction
+            document.addEventListener('click', (e) => {
+                const target = e.target.closest('.remove-file-button')
+
+                if (target) {                    
+                    var card = target.closest('.card');
+                    var fileList = card.querySelector('.file-list');
+
+                    target.parentElement.remove();
+
+                    if (fileList.children.length == 0) {
+                        card.querySelector('.add-file-info').classList.remove('d-none');
+                    }
+                }
+            })
+
+            // Event listener for collapsing & expanding instruction cards
+            document.addEventListener("click", function(e){
+                const target = e.target.closest(".bs-collapse");
+                if(target){
+                    target.parentElement.querySelector('.bs-collapse-inactive').classList.remove('d-none', 'bs-collapse-inactive');
+                    target.classList.add('d-none', 'bs-collapse-inactive').add();
+                }
+            });
+
+            // Event listener for collapsing & expanding instruction cards
+            document.addEventListener("click", function(e){
+                const target = e.target.closest(".move-instruction-down-button");
+                if(target){
+                    var instructionCard = target.closest('.instruction-card');
+                    var instructionCardIndex = Array.prototype.indexOf.call(elements.fileInstructionsList.children, instructionCard);
+                    var nextInstructionCardIndex  = instructionCardIndex + 1;
+                    var nextInstructionCard = elements.fileInstructionsList.children[nextInstructionCardIndex];
+
+                    methods.updateInstructionCardMovementButtons(instructionCard, nextInstructionCardIndex);
+                    methods.updateInstructionCardMovementButtons(nextInstructionCard, instructionCardIndex);
+
+                    elements.fileInstructionsList.insertBefore(nextInstructionCard, instructionCard);
+                }
+            });
+
+            // Event listener for collapsing & expanding instruction cards
+            document.addEventListener("click", function(e){
+                const target = e.target.closest(".move-instruction-up-button");
+                if(target){
+                    var instructionCard = target.closest('.instruction-card');
+                    var instructionCardIndex = Array.prototype.indexOf.call(elements.fileInstructionsList.children, instructionCard);
+                    var previousInstructionCardIndex  = instructionCardIndex - 1;
+                    var previousInstructionCard = elements.fileInstructionsList.children[previousInstructionCardIndex];
+                    console.log(instructionCard)
+                    console.log(instructionCardIndex)
+                    console.log(previousInstructionCardIndex)
+                    console.log(previousInstructionCard)
+                    methods.updateInstructionCardMovementButtons(instructionCard, previousInstructionCardIndex);
+                    methods.updateInstructionCardMovementButtons(previousInstructionCard, instructionCardIndex);
+                    elements.fileInstructionsList.insertBefore(instructionCard, previousInstructionCard);
+                }
+            });
+        },
+        'updateInstructionCardMovementButtons': (instructionCard, index) => {
+            if (index == 0) {
+                console.log("here1");
+                instructionCard.querySelector('.move-instruction-up-button').classList.add('d-none');
+                instructionCard.querySelector('.move-instruction-down-button').classList.remove('d-none');
+            }
+            else if (index == state.instructionCount - 1) {
+                console.log("here2");
+                console.log(elements.fileInstructionsList.length - 1)
+                instructionCard.querySelector('.move-instruction-up-button').classList.remove('d-none');
+                instructionCard.querySelector('.move-instruction-down-button').classList.add('d-none');
+            }
+            else {
+                console.log("here3");
+                console.log(index)
+                instructionCard.querySelector('.move-instruction-up-button').classList.remove('d-none');
+                instructionCard.querySelector('.move-instruction-down-button').classList.remove('d-none');
+            }
+        }
+    }
+    
+    methods.init()
+
+})();
+//var exampleModal = ;
+
+
+
+
+</script>
+{% endblock %}

@@ -1,0 +1,93 @@
+{% load bootstrap_icons %}
+
+<div class="instruction-card card mb-3">
+  <div class="card-header d-flex justify-content-between">
+    <div>
+      <button class="remove-instruction-button btn btn-sm" type="button" title="Remove instruction button">
+        {% bs_icon 'trash' size='1.5em' %}
+      </button>
+    </div>
+    <div>
+      <button type="button" class="btn move-instruction-up-button" title="Move instruction up">
+        {% bs_icon 'arrow-up' size='1.5em' %}
+      </button>
+      <button type="button" class="btn move-instruction-down-button" title="Move instruction down">
+        {% bs_icon 'arrow-down' size='1.5em' %}
+      </button>
+      <!-- <button type="button" class="btn btn-sm bs-collapse-button" title="Collapse Instruction" data-bs-toggle="collapse">
+        {% bs_icon 'chevron-up' size='1.5em' %}
+      </button> -->
+      <button type="button" class="btn bs-collapse" title="Collapse Instruction" data-bs-toggle="collapse">
+        {% bs_icon 'chevron-up' size='1.5em' %}
+      </button>
+      <button type="button" class="btn bs-collapse bs-collapse-inactive d-none" title="Expand Instruction" data-bs-toggle="collapse">
+        {% bs_icon 'chevron-down' size='1.5em' %}
+      </button>
+    </div>
+  </div>
+  <div class="card-body collapse show">
+    <div class="container"><div class="row">
+    <div class="col-4">
+      <div class="mb-3">
+        <input name="starting-directory-input" name="starting-directory" type="text" class="form-control" placeholder="Starting Directory" aria-label="starting directory">
+      </div>
+      <div class="mb-3">
+        <input id="tab-input" name="tab" type="text" class="form-control" placeholder="Tab" aria-label="tab">
+      </div>
+      <div class="mb-3">
+        <div class="form-check">
+          <input id="is-advanced-input" name="is-advanced" class="form-check-input" type="checkbox" />
+          <label class="form-check-label" for="is-advanced-input">Is Advanced</label>
+        </div>
+      </div>
+      <div class="mb-3">
+        <div class="form-check">
+          <input id="is-exclusive-input" name="is-exclusive" class="form-check-input" type="checkbox" />
+          <label class="form-check-label" for="is-exclusive-input">Is Exclusive</label>
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between">
+          <div>
+            Directories
+          </div>
+          <div>
+            <button type="button" class="add-directory-button btn btn-sm" title="Add Directory Button">
+              {% bs_icon 'plus' size='1.5em' %}
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="add-directory-info alert alert-info" role="alert">
+            Add a directory...
+          </div>
+          <div class="directory-list"></div>
+        </div>
+      </div>
+    </div>
+    <div class="col-4">
+      <div class="card">
+        <div class="card-header d-flex justify-content-between">
+          <div>
+            Files
+          </div>
+          <div>
+            <button type="button" class="add-file-button btn btn-sm" title="Move instruction down">
+              {% bs_icon 'plus' size='1.5em' %}
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="add-file-info alert alert-info" role="alert">
+            Add a file...
+          </div>
+          <div class="file-list"></div>
+        </div>
+      </div>
+    </div>
+  </div></div>
+  </div>
+  
+</div>

@@ -1,0 +1,40 @@
+{% load django_bootstrap5 %}
+
+<div class="modal fade readonly-modal" id="start-download-modal-{{instruction_id}}" tabindex="-1" aria-labelledby="start-download-modal-label-{{instruction_id}}" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+
+      <div class="modal-header">
+        <h5 class="modal-title" id="start-download-modal-label-{{instruction_id}}">Start Download ({{index}})</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+
+      <form action="/presto/start-download" method="post" class="form" enctype="multipart/form-data">
+
+        <div class="modal-body">
+          {% csrf_token %}
+          <div class="mb-3 d-none">
+            <label for="instruction-id-{{instruction_id}}" class="form-label">Instruction ID</label>
+            <input type="text" class="form-control" id="instruction-id-{{instruction_id}}" name="instruction-id" value="{{instruction_id}}">
+          </div>
+          <div class="mb-3">
+            <label for="presto-username-{{instruction_id}}" class="form-label">Presto Username</label>
+            <input type="text" class="form-control" id="presto-userrname-{{instruction_id}}" name="presto-username" autocomplete="off" readonly onfocus="this.removeAttribute('readonly');">
+          </div>
+          <div class="mb-3">
+            <label for="presto-password-{{instruction_id}}" class="form-label">Presto Password</label>
+            <input type="text" class="form-control" id="presto-password-{{instruction_id}}" name="presto-password">
+          </div>
+           
+        </div>
+
+        <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+            {% bootstrap_button button_type="submit" content="Submit" class="success" %}
+        </div>
+
+      </form>
+
+    </div>
+  </div>
+</div>
